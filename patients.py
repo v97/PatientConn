@@ -1,46 +1,56 @@
+from flask import Flask
+from pymongo import MongoClient
 import json
-import pymongo
 
-# all
+client = MongoClient('mongodb://localhost:27017/')
+db = client.test_database
+patients = db.test_collection
+patients.delete_many({})
+#print([doc for doc in patients.find({"age" : 19})])
 
-# x = registerUserJSON("Brian", 69, True, [])
-
-def registerUserJSON(name, age, gender, symptoms):
-    user_data = {}
-    user_data['name'] = name
-    user_data['age'] = age
-    user_data['gender'] = gender
-    user_data['symptoms'] = []
-    user_data['appointments'] = []
+def newPatientJSON(name, age, male, symptoms):
+    patient = {}
+    patient['name'] = name
+    patient['allergies'] = []
+    patient['age'] = age
+    patient['male'] = male
+    patient['symptoms'] = symptoms
+    patient['appointments'] = []
     prescription = {}
-    prescription['medication'] = []
+    prescription['medication'] = {}
     prescription['nutrition'] = []
     sleep = {}
-    sleep['hours'] = 9
+    sleep['hours'] = 8
     sleep['comments'] = []
     prescription['sleep'] = sleep
-    user_data['prescriptions'] = prescription
-    return json.dumps(user_data)
+    patient['prescriptions'] = prescription
+    return patient
 
-def addSymptom(name, date, scale):
-    user_symptom = {}
-    user_symptom['name'] = name
-    user_symptom['frequency'] = 1
-    instances = [addInstanceSymptom(date, scale)]
-    user_symptom['instances'] = instances
-    user_symptom['ongoing'] = True
-    return json.dumps(user_symptom)
+def addPatient(name, age, male, symptoms = None):
+    if symptoms is None:
+        symptoms = {}
+    id = patients.insert(newPatientJSON(name, age, male, symptoms))
+    return id
 
-def endSymptom():
+def addSymptomInstance(id, symptom, freq, severity, start, end = None):
+    patient = patients.find({"_id": id}).next()
+    instance = {"start": start, "end": end, "freq": freq, "severity": severity}
+    if symptom in patient["symptoms"]:
+        patient["symptoms"][symptom]["instances"].append(instance)
+    else:
+        patient["symptoms"][symptom] = {"instances": [instance]}
+    patients.update({"_id": id}, patient, upsert=True)
 
+def endOngoingSymptom(id, symptom, end):
+    patient = patients.find({"_id": id}).next()
+    patient["symptoms"][symptom]["instances"][-1]["end"] = end
 
-def addInstanceSymptom(date, scale):
-    instance = {}
-    instance['startdate'] = date
-    instance['enddate'] = False
-    instance['scale'] = scale
-    return instance
-
+def symptomOngoing(id, symptom):
+    patient = patients.find({"_id": id}).next()
+    if symptom in patient["symptoms"] == False:
+        return False
+    return (patient["symptoms"][symptom]["instances"][-1]["end"] is None) == False
+    
 def getDate(date):
     temp = date.split('-')
     date = {}
@@ -49,24 +59,30 @@ def getDate(date):
     date['Y'] = int('20' + temp[2]) if temp[2] < 100 else int(temp[2])
     return date
 
-def addInstanceMedi(dosage, freq, freqUnit, start, end, comments):
-    instance = {}
-    instance['dosage'] = dosage
-    instance['frequency'] = freq
-    instance['freqUnit'] = freqUnit
-    instance['start'] = start
-    instance['end'] = end
-    instance['comments'] = comments
+def addMedicine(drug, dosage, freq, comments, start, end):
+    patient = patients.find({"_id": id})
+    instance = {"dosage": dosage, "freq": freq, "start": start, "end": end, "comments": comments}
+    patient["prescription"]["medication"][drug] = patient["prescription"]["medication"].get("drug", []) + [instance]
+    patients.update({"_id": id}, patient, upsert=True)
 
-    return instance
+def endOngoingMedicine(drug, end):
+    patient = patients.find({"_id": id})
+    patient["prescription"]["medication"][drug][-1]["end"] = end
+    patients.update({"_id": id}, patient, upsert=True)
 
-def addMedication(drug, instances, dosage, freq, freqUnit, start, end, comments):
-    medication = {}
-    medication['drug'] = drug
-    medication['ongoing'] = True
-    instances = [addInstanceMedi(dosage, freq, freqUnit, start, end, comments)]
-    medication['instances'] = instances
+def medicineOngoing(id, drug):
+    patient = patients.find({"_id": id}).next()
+    if drug in patient["prescription"]["medication"] == False:
+        return False
+    return (patient["prescription"]["medication"][drug][-1]["end"] is None) == False
 
-def endSymptom(name, date, symptom):
+def getMedication():
+    patient = patients.find({"_id": id})
+    patient["medication"]
+    patients.update({"_id": id}, patient, upsert=True)
 
+id = addPatient("Vikram", 19, True)
+addSymptomInstance(id, "Jew", True, 10, 1, "21/01/2017")
+endOngoingSymptom(id, "Jew", "22/01/2026")
 
+print(patients.find({"_id": id}).next())
