@@ -51,8 +51,8 @@ def symptomOngoing(id, symptom):
         return False
     return (patient["symptoms"][symptom]["instances"][-1]["end"] is None) == False
     
-def getDate(date):
-    temp = date.split('-')
+def getDate(d):
+    temp = d.split('-')
     date = {}
     date['M'] = int(temp[0])
     date['D'] = int(temp[1])
@@ -65,24 +65,18 @@ def addMedicine(drug, dosage, freq, comments, start, end):
     patient["prescription"]["medication"][drug] = patient["prescription"]["medication"].get("drug", []) + [instance]
     patients.update({"_id": id}, patient, upsert=True)
 
-def endOngoingMedicine(drug, end):
+def sendOngoingMedicine(drug, end):
     patient = patients.find({"_id": id})
     patient["prescription"]["medication"][drug][-1]["end"] = end
     patients.update({"_id": id}, patient, upsert=True)
-
-def medicineOngoing(id, drug):
-    patient = patients.find({"_id": id}).next()
-    if drug in patient["prescription"]["medication"] == False:
-        return False
-    return (patient["prescription"]["medication"][drug][-1]["end"] is None) == False
 
 def getMedication():
     patient = patients.find({"_id": id})
     patient["medication"]
     patients.update({"_id": id}, patient, upsert=True)
-
-id = addPatient("Vikram", 19, True)
-addSymptomInstance(id, "Jew", True, 10, 1, "21/01/2017")
-endOngoingSymptom(id, "Jew", "22/01/2026")
-
-print(patients.find({"_id": id}).next())
+#
+#id = addPatient("Vikram", 19, True)
+#addSymptomInstance(id, "Jew", True, 10, 1, "21/01/2017")
+#endOngoingSymptom(id, "Jew", "22/01/2026")
+#
+#print(patients.find({"_id": id}).next())
