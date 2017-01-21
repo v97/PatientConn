@@ -6,10 +6,10 @@ from pymongo import MongoClient
 from bson.objectid import ObjectId
 
 app = Flask(__name__)
-app.config['MONGO_DBNAME'] = 'test_database'
-app.config['MONGO_URI'] = 'mongodb://localhost:27017/test_database'
+app.config['MONGO_DBNAME'] = 'users'
+app.config['MONGO_URI'] = 'mongodb://localhost:27017/users'
 client = MongoClient('mongodb://localhost:27017/')
-patients = (client.test_database)["patients"]
+patients = (client.users)["patients"]
 
 def newPatientJSON(name, age, male, symptoms):
     patient = {}
@@ -145,9 +145,6 @@ def clear():
 	patients.delete_many({})
 	return True
 
-patients.delete_many({})
-TEMP_ADD("Vikram", 19, True)
-TEMP_ADD("Kshit", 29, False)	
 #addSymptomInstance(id, "Jew", True, 10, 1, "21/01/2017")
 #endOngoingSymptom(id, "Jew", "22/01/2026")
 app.run()
