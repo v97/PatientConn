@@ -147,4 +147,4 @@ def clear():
 
 #addSymptomInstance(id, "Jew", True, 10, 1, "21/01/2017")
 #endOngoingSymptom(id, "Jew", "22/01/2026")
-app.run(port='0.0.0.0', host=8080)
+app.run(port="0.0.0.0", host=8080)
