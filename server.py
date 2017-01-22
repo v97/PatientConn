@@ -96,7 +96,7 @@ def endOngoingSymptom(id, symptom, end):
 
 @app.route('/drugsToTakeWithin/<id>/<minutes>')    
 def drugsToTakeWithin(id, minutes):
-    	patient = patients.find({"_id": ObjectId(id)}).next()
+    patient = patients.find({"_id": ObjectId(id)}).next()
 	drugsToTake = []
 	now = datetime.datetime.now()
 	for d in patient["prescription"]["medication"]["drug"]:
@@ -108,7 +108,7 @@ def drugsToTakeWithin(id, minutes):
 				if((diff >= 0) and (diff <= minutes)):
 					drugs.append(d)
 					break
-	return drugsToTake
+    return drugsToTake
 
 @app.route('/addMedicine/<drug>/<dosage>/<daysOfWeek>/<times>/<comments>/<start>/<end>')
 def addMedicine(drug, dosage, daysOfWeek, times, comments, start, end):
