@@ -139,6 +139,10 @@ def getNutrition(id):
 def getPatient(id):
 	return str(patients.find({"_id": ObjectId(id)}).next())
 
+@app.route('/getExercise/<id>')
+def getPatient(id):
+	return str((patients.find({"_id": ObjectId(id)}).next())["exercise"])
+
 @app.route('/getPatients/')
 def getPatients():
 	return str([docs for docs in patients.find({})])
