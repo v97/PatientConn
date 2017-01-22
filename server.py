@@ -140,7 +140,7 @@ def getPatient(id):
 	return str(patients.find({"_id": ObjectId(id)}).next())
 
 @app.route('/getExercise/<id>')
-def getPatient(id):
+def getExercise(id):
 	return str((patients.find({"_id": ObjectId(id)}).next())["exercise"])
 
 @app.route('/getPatients/')
