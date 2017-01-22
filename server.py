@@ -60,7 +60,7 @@ def updateExercise():
 
 @app.route('/updateSleep/', methods = ['POST'])
 def updateSleep():
-	patient = patients.find({"_id": ObjectId(id)}).next()
+	patient = patients.find({"_id": request.form["id"]}).next()
 	patient["prescription"]["sleep"] = request.form["sleep"]
 	patients.update({"_id": request.form["id"]}, patient, {upsert:True})
 	return "True"
