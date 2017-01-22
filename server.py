@@ -112,13 +112,16 @@ def drugsToTakeWithin(id, minutes):
 					break
 	return str(drugsToTake)
 
-@app.route('/addMedicine', methods = ['POST'])
+@app.route('/addMedicine/', methods = ['POST'])
 def addMedicine():
-	patient = patients.find({"_id": ObjectId(request.args["id"])}).next()
-	instance = {"dosage": request.args["dosage"], "daysOfWeek": request.args["daysofWeek"], "times": request.args["times"], "start": request.args["start"], "end": request.args["end"], "comments": request.args["comments"]}
-	patient["prescription"]["medication"][drug] = patient["prescription"]["medication"].get("drug", []) + [instance]
-	patients.update({"_id": ObjectId(id)}, patient, upsert=True)
-	return "True"
+    patient = patients.find({"_id": ObjectId(request.form["id"])}).next()
+    instance = {"dosage": request.args["dosage"], "daysOfWeek": request.args["daysOfWeek"], "times": request.args["times"], "start": request.args["start"], "end": request.args["end"], "comments": request.args["comments"]}
+    #instance = {"dosage": request.args["dosage"]}
+    patient["prescription"]["medication"][drug] = patient["prescription"]["medication"].get("drug", []) + [instance]
+    patients.updateOne({"_id": ObjectId(id)}, patient, {upsert: True})
+	#return "e"
+	#patients.update({"_id": ObjectId(id)}, )
+
 
 @app.route('/getMedication/<id>')
 def getMedication(id):
@@ -149,4 +152,4 @@ def index():
 
 #addSymptomInstance(id, "Jew", True, 10, 1, "21/01/2017")
 #endOngoingSymptom(id, "Jew", "22/01/2026")
-app.run(host="0.0.0.0", port=80)
+app.run(host="0.0.0.0", port=8080)
