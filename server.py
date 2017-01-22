@@ -118,7 +118,7 @@ def addMedicine():
     instance = {"dosage": request.args["dosage"], "daysOfWeek": request.args["daysOfWeek"], "times": request.args["times"], "start": request.args["start"], "end": request.args["end"], "comments": request.args["comments"]}
     #instance = {"dosage": request.args["dosage"]}
     patient["prescription"]["medication"][drug] = patient["prescription"]["medication"].get("drug", []) + [instance]
-    patients.updateOne({"_id": ObjectId(id)}, patient, {upsert: True})
+    patients.updateOne({"_id": ObjectId(id)}, patient)
 	#return "e"
 	#patients.update({"_id": ObjectId(id)}, )
 
