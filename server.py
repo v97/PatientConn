@@ -152,4 +152,4 @@ def index():
 
 #addSymptomInstance(id, "Jew", True, 10, 1, "21/01/2017")
 #endOngoingSymptom(id, "Jew", "22/01/2026")
-app.run(host="0.0.0.0", port=8080)
+app.run(host="0.0.0.0", port=80)
