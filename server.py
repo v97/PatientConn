@@ -41,21 +41,21 @@ def addPatient():
 
 @app.route('/updatePatient/', methods = ['POST'])
 def updatePatient():
-	patients.update({"_id": ObjectId(request.form["id"])}, request.form["patient"], upsert=True)
+	patients.update({"_id": ObjectId(request.form["id"])}, request.form["patient"])
 	return "True"
 
 @app.route('/updateNutrition/', methods = ['POST'])
 def updateNutrition():
 	patient = patients.find({"_id": ObjectId(id)}).next()
 	patient["prescription"]["nutrition"].append(request.form["nutrition"])
-	patients.update({"_id": ObjectId(request.form["id"])}, patient, upsert=True)
+	patients.update({"_id": ObjectId(request.form["id"])}, patient)
 	return "True"
 
 @app.route('/updateExercise/', methods = ['POST'])
 def updateExercise():
 	patient = patients.find({"_id": ObjectId(id)}).next()
 	patient["prescription"]["exercise"] = request.form["exercise"]
-	patients.update({"_id": ObjectId(request.form["id"])}, patient, upsert=True)
+	patients.update({"_id": ObjectId(request.form["id"])}, patient)
 	return "True"
 
 @app.route('/updateSleep/', methods = ['POST'])
@@ -81,7 +81,7 @@ def addSymptomInstance(id, symptom, freq, severity, start, end):
 		patient["symptoms"][symptom]["instances"].append(instance)
 	else:
 		patient["symptoms"][symptom] = {"instances": [instance]}
-	patients.update({"_id": ObjectId(id)}, patient, upsert=True)
+	patients.update({"_id": ObjectId(id)}, patient)
 	return "True"
 
 @app.route('/symptomOngoing/<id>/<symptom>')
@@ -95,7 +95,7 @@ def symptomOngoing(id, symptom):
 def endOngoingSymptom(id, symptom, end):
 	patient = patients.find({"_id": ObjectId(id)}).next()
 	patient["symptoms"][symptom]["instances"][-1]["end"] = end
-	patients.update({"_id": ObjectId(id)}, patient, upsert=True)
+	patients.update({"_id": ObjectId(id)}, patient)
 	return "True"
 
 @app.route('/drugsToTakeWithin/<id>/<minutes>')    
