@@ -4,6 +4,7 @@ from flask import request
 from flask_pymongo import PyMongo
 from pymongo import MongoClient
 from bson.objectid import ObjectId
+import time
 
 app = Flask(__name__)
 app.config['MONGO_DBNAME'] = 'users'
@@ -145,6 +146,10 @@ def clear():
 	patients.delete_many({})
 	return True
 
+@app.route('/')
+def index():
+    return str(time.time())
+
 #addSymptomInstance(id, "Jew", True, 10, 1, "21/01/2017")
 #endOngoingSymptom(id, "Jew", "22/01/2026")
-app.run(host="0.0.0.0", port=8080)
+app.run(host="0.0.0.0", port=80)
