@@ -112,10 +112,10 @@ def drugsToTakeWithin(id, minutes):
 					break
 	return str(drugsToTake)
 
-@app.route('/addMedicine/<drug>/<dosage>/<daysOfWeek>/<times>/<comments>/<start>/<end>')
-def addMedicine(drug, dosage, daysOfWeek, times, comments, start, end):
+@app.route('/addMedicine/<id>', methods = ['POST'])
+def addMedicine(id):
 	patient = patients.find({"_id": ObjectId(id)}).next()
-	instance = {"dosage": dosage, "daysOfWeek": daysOfWeek, "times": times, "start": start, "end": end, "comments": comments}
+	instance = {"dosage": request.form["dosage"], "daysOfWeek": request.form["daysofWeek"], "times": request.form["times"], "start": request.form["start"], "end": request.form["end"], "comments": request.form["comments"]}
 	patient["prescription"]["medication"][drug] = patient["prescription"]["medication"].get("drug", []) + [instance]
 	patients.update({"_id": ObjectId(id)}, patient, upsert=True)
 	return "True"
