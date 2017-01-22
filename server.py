@@ -42,28 +42,28 @@ def addPatient():
 @app.route('/updatePatient/', methods = ['POST'])
 def updatePatient():
 	patients.update({"_id": ObjectId(request.form["id"])}, request.form["patient"], upsert=True)
-	return True
+	return "True"
 
 @app.route('/updateNutrition/', methods = ['POST'])
 def updateNutrition():
 	patient = patients.find({"_id": ObjectId(id)}).next()
 	patient["prescription"]["nutrition"].append(request.form["nutrition"])
 	patients.update({"_id": ObjectId(request.form["id"])}, patient, upsert=True)
-	return True
+	return "True"
 
 @app.route('/updateExercise/', methods = ['POST'])
 def updateExercise():
 	patient = patients.find({"_id": ObjectId(id)}).next()
 	patient["prescription"]["exercise"] = request.form["exercise"]
 	patients.update({"_id": ObjectId(request.form["id"])}, patient, upsert=True)
-	return True
+	return "True"
 
 @app.route('/updateSleep/', methods = ['POST'])
 def updateSleep():
 	patient = patients.find({"_id": ObjectId(id)}).next()
 	patient["prescription"]["sleep"] = request.form["sleep"]
 	patients.update({"_id": ObjectId(request.form["id"])}, patient, upsert=True)
-	return True
+	return "True"
 
 def TEMP_ADD(name, DOB, male, symptoms = None):
 	if symptoms is None:
@@ -73,26 +73,28 @@ def TEMP_ADD(name, DOB, male, symptoms = None):
 
 @app.route('/addSymptomInstance/<id>/<symptom>/<freq>/<severity>/<start>/<end>/')
 def addSymptomInstance(id, symptom, freq, severity, start, end):
-    patient = patients.find({"_id": ObjectId(id)}).next()
-    instance = {"start": start, "end": end, "freq": freq, "severity": severity}
-    if symptom in patient["symptoms"]:
-        patient["symptoms"][symptom]["instances"].append(instance)
-    else:
-        patient["symptoms"][symptom] = {"instances": [instance]}
-    patients.update({"_id": ObjectId(id)}, patient, upsert=True)
+	patient = patients.find({"_id": ObjectId(id)}).next()
+	instance = {"start": start, "end": end, "freq": freq, "severity": severity}
+	if symptom in patient["symptoms"]:
+		patient["symptoms"][symptom]["instances"].append(instance)
+	else:
+		patient["symptoms"][symptom] = {"instances": [instance]}
+	patients.update({"_id": ObjectId(id)}, patient, upsert=True)
+	return "True"
 
 @app.route('/symptomOngoing/<id>/<symptom>')
 def symptomOngoing(id, symptom):
     patient = patients.find({"_id": ObjectId(id)}).next()
     if symptom in patient["symptoms"] == False:
-        return False
-    return (patient["symptoms"][symptom]["instances"][-1]["end"] is None) == False
+        return "False"
+    return str((patient["symptoms"][symptom]["instances"][-1]["end"] is None) == False)
 
 @app.route('/endOngoingSymptom/<symptom>/<end>')
 def endOngoingSymptom(id, symptom, end):
 	patient = patients.find({"_id": ObjectId(id)}).next()
 	patient["symptoms"][symptom]["instances"][-1]["end"] = end
 	patients.update({"_id": ObjectId(id)}, patient, upsert=True)
+	return "True"
 
 @app.route('/drugsToTakeWithin/<id>/<minutes>')    
 def drugsToTakeWithin(id, minutes):
@@ -108,7 +110,7 @@ def drugsToTakeWithin(id, minutes):
 				if((diff >= 0) and (diff <= minutes)):
 					drugs.append(d)
 					break
-	return drugsToTake
+	return str(drugsToTake)
 
 @app.route('/addMedicine/<drug>/<dosage>/<daysOfWeek>/<times>/<comments>/<start>/<end>')
 def addMedicine(drug, dosage, daysOfWeek, times, comments, start, end):
@@ -116,17 +118,17 @@ def addMedicine(drug, dosage, daysOfWeek, times, comments, start, end):
 	instance = {"dosage": dosage, "daysOfWeek": daysOfWeek, "times": times, "start": start, "end": end, "comments": comments}
 	patient["prescription"]["medication"][drug] = patient["prescription"]["medication"].get("drug", []) + [instance]
 	patients.update({"_id": ObjectId(id)}, patient, upsert=True)
-	return True
+	return "True"
 
 @app.route('/getMedication/<id>')
 def getMedication(id):
     patient = patients.find({"_id": ObjectId(id)}).next()
-    return patient["medication"]
+    return str(patient["medication"])
 
 @app.route('/getNutrition/<id>')
 def getNutrition(id):
     patient = patients.find({"_id": ObjectId(id)}).next()
-    return patient["nutrition"]
+    return str(patient["nutrition"])
 
 @app.route('/getPatient/<id>')
 def getPatient(id):
@@ -139,7 +141,7 @@ def getPatients():
 @app.route('/clear/')
 def clear():
 	patients.delete_many({})
-	return True
+	return "True"
 
 @app.route('/')
 def index():
