@@ -64,7 +64,7 @@ def updateSleep():
 	if not ("prescription" in patient):
 		patient["prescription"] = {}
 	patient["prescription"]["sleep"] = request.form["sleep"]
-	patients.update({"_id": request.form["id"]}, patient, {upsert:True})
+	patients.update({"_id": ObjectId(request.form["id"])}, patient, {upsert:True})
 	return "True"
 
 def TEMP_ADD(name, DOB, male, symptoms = None):
