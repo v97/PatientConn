@@ -101,7 +101,7 @@ def drugsToTakeWithin(id, minutes):
 	now = datetime.datetime.now()
 	for d in patient["prescription"]["medication"]["drug"]:
 		date = patient["prescription"]["medication"][d][-1]["end"].split("/")
-		if ((date[0] == now.strftime("%d")) and (date[1] == now.strftime("%m")) and (date[2] == now.strftime("%y"))):
+		if ((date[0] == now.strftime("%d")) and (date[1] == now.strftime("%m")) and (date[2] == now.strftime("%y")) and (daysOfWeek[now.weekday()])):
 			times = patient["prescription"]["medication"][drug][-1]["times"]
 			for time in times:
 				diff = time - (60*now.strftime("%H") + now.strftime("%M"))
