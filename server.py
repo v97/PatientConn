@@ -1,12 +1,15 @@
 from flask import Flask
+from flask import jsonify
+from flask import request
+from flask_pymongo import PyMongo
 from pymongo import MongoClient
-import json
+from bson.objectid import ObjectId
 
+app = Flask(__name__)
+app.config['MONGO_DBNAME'] = 'test_database'
+app.config['MONGO_URI'] = 'mongodb://localhost:27017/test_database'
 client = MongoClient('mongodb://localhost:27017/')
-db = client.test_database
-patients = db.test_collection
-patients.delete_many({})
-#print([doc for doc in patients.find({"age" : 19})])
+patients = (client.test_database)["patients"]
 
 def newPatientJSON(name, age, male, symptoms):
     patient = {}
@@ -26,12 +29,17 @@ def newPatientJSON(name, age, male, symptoms):
     patient['prescriptions'] = prescription
     return patient
 
+@app.route('/addPatient/', [methods = 'POST'])
 def addPatient(name, age, male, symptoms = None):
-    if symptoms is None:
-        symptoms = {}
-    id = patients.insert(newPatientJSON(name, age, male, symptoms))
-    return id
+	#<name>/<age>/<male>/<symptoms>
+	a = request.form()
+	#if symptoms is None:
+	#	symptoms = {}
+	#id = patients.insert(newPatientJSON(name, age, male, symptoms))
+	print(a)
+	return "134"
 
+@app.route('/addSymptomInstance')
 def addSymptomInstance(id, symptom, freq, severity, start, end = None):
     patient = patients.find({"_id": id}).next()
     instance = {"start": start, "end": end, "freq": freq, "severity": severity}
@@ -41,9 +49,11 @@ def addSymptomInstance(id, symptom, freq, severity, start, end = None):
         patient["symptoms"][symptom] = {"instances": [instance]}
     patients.update({"_id": id}, patient, upsert=True)
 
+@app.route('/endOngoingSymptom/<symptom>/<end>')
 def endOngoingSymptom(id, symptom, end):
-    patient = patients.find({"_id": id}).next()
-    patient["symptoms"][symptom]["instances"][-1]["end"] = end
+	patient = patients.find({"_id": id}).next()
+	patient["symptoms"][symptom]["instances"][-1]["end"] = end
+	patients.update({"_id": id}, patient, upsert=True)
 
 def symptomOngoing(id, symptom):
     patient = patients.find({"_id": id}).next()
@@ -81,8 +91,14 @@ def getMedication():
     patient["medication"]
     patients.update({"_id": id}, patient, upsert=True)
 
-id = addPatient("Vikram", 19, True)
-addSymptomInstance(id, "Jew", True, 10, 1, "21/01/2017")
-endOngoingSymptom(id, "Jew", "22/01/2026")
+patients.delete_many({})
+id = addPatient("Vikram", 19, True)	
+print(id)
 
-print(patients.find({"_id": id}).next())
+@app.route('/getPatient/<id>')
+def getPatient(id):
+	return str(patients.find({"_id": ObjectId(id)}).next())
+
+#addSymptomInstance(id, "Jew", True, 10, 1, "21/01/2017")
+#endOngoingSymptom(id, "Jew", "22/01/2026")
+app.run()
