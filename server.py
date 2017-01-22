@@ -147,7 +147,7 @@ def getExercise(id):
 		return
 	if not "exercise" in patient["prescription"]:
 		return
-	return patient['prescription']['exercise']
+	return patient["prescription"]["exercise"]
 
 
 @app.route('/getPatients/')
