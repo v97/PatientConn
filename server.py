@@ -95,9 +95,9 @@ def endOngoingSymptom(id, symptom, end):
 	patients.update({"_id": ObjectId(id)}, patient, upsert=True)
 
 @app.route('/drugsToTakeWithin/<id>/<minutes>')    
-def drugsToTakeWithin(id, minutes):
+def drugsToTakeWithin(id, minutes):    
+    drugsToTake = []
     patient = patients.find({"_id": ObjectId(id)}).next()
-	drugsToTake = []
 	now = datetime.datetime.now()
 	for d in patient["prescription"]["medication"]["drug"]:
 		date = patient["prescription"]["medication"][d][-1]["end"].split("/")
