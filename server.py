@@ -5,6 +5,7 @@ from flask_pymongo import PyMongo
 from pymongo import MongoClient
 from bson.objectid import ObjectId
 import time
+import datetime
 
 app = Flask(__name__)
 app.config['MONGO_DBNAME'] = 'users'
@@ -12,11 +13,11 @@ app.config['MONGO_URI'] = 'mongodb://localhost:27017/users'
 client = MongoClient('mongodb://localhost:27017/')
 patients = (client.users)["patients"]
 
-def newPatientJSON(name, age, male, symptoms):
+def newPatientJSON(name, DOB, male, symptoms):
     patient = {}
     patient['name'] = name
     patient['allergies'] = []
-    patient['age'] = age
+    patient['DOB'] = DOB
     patient['male'] = male
     patient['symptoms'] = symptoms
     patient['appointments'] = []
@@ -35,7 +36,7 @@ def addPatient():
 	symptoms = request.form["symptoms"]
 	if symptoms is None:
 		symptoms = {}
-	id = patients.insert(newPatientJSON(request.form["name"], request.form["age"], request.form["male"], symptoms))
+	id = patients.insert(newPatientJSON(request.form["name"], request.form["DOB"], request.form["male"], symptoms))
 	return str(id)
 
 @app.route('/updatePatient/', methods = ['POST'])
@@ -64,10 +65,10 @@ def updateSleep():
 	patients.update({"_id": ObjectId(request.form["id"])}, patient, upsert=True)
 	return True
 
-def TEMP_ADD(name, age, male, symptoms = None):
+def TEMP_ADD(name, DOB, male, symptoms = None):
 	if symptoms is None:
 		symptoms = {}
-	id = patients.insert(newPatientJSON(name, age, male, symptoms))
+	id = patients.insert(newPatientJSON(name, DOB, male, symptoms))
 	return str(id)
 
 @app.route('/addSymptomInstance/<id>/<symptom>/<freq>/<severity>/<start>/<end>/')
@@ -92,36 +93,30 @@ def endOngoingSymptom(id, symptom, end):
 	patient = patients.find({"_id": ObjectId(id)}).next()
 	patient["symptoms"][symptom]["instances"][-1]["end"] = end
 	patients.update({"_id": ObjectId(id)}, patient, upsert=True)
-    
-def getDate(date):
-    temp = date.split('-')
-    date = {}
-    date['M'] = int(temp[0])
-    date['D'] = int(temp[1])
-    date['Y'] = int('20' + temp[2]) if temp[2] < 100 else int(temp[2])
-    return date
 
-@app.route('/addMedicine/<drug>/<dosage>/<freq>/<comments>/<start>/<end>')
-def addMedicine(drug, dosage, freq, comments, start, end):
+@app.route('/drugsToTakeWithin/<id>/<minutes>')    
+def drugsToTakeWithin(id, minutes):
+    	patient = patients.find({"_id": ObjectId(id)}).next()
+	drugsToTake = []
+	now = datetime.datetime.now()
+	for d in patient["prescription"]["medication"]["drug"]:
+		date = patient["prescription"]["medication"][d][-1]["end"].split("/")
+		if ((date[0] == now.strftime("%d")) and (date[1] == now.strftime("%m")) and (date[2] == now.strftime("%y"))):
+			times = patient["prescription"]["medication"][drug][-1]["times"]
+			for time in times:
+				diff = time - (60*now.strftime("%H") + now.strftime("%M"))
+				if((diff >= 0) and (diff <= minutes)):
+					drugs.append(d)
+					break
+	return drugsToTake
+
+@app.route('/addMedicine/<drug>/<dosage>/<daysOfWeek>/<times>/<comments>/<start>/<end>')
+def addMedicine(drug, dosage, daysOfWeek, times, comments, start, end):
 	patient = patients.find({"_id": ObjectId(id)}).next()
-	instance = {"dosage": dosage, "freq": freq, "start": start, "end": end, "comments": comments}
+	instance = {"dosage": dosage, "daysOfWeek": daysOfWeek, "times": times, "start": start, "end": end, "comments": comments}
 	patient["prescription"]["medication"][drug] = patient["prescription"]["medication"].get("drug", []) + [instance]
 	patients.update({"_id": ObjectId(id)}, patient, upsert=True)
 	return True
-
-@app.route('/endOngoingMedicine/<id>/<drug>/<end>')
-def endOngoingMedicine(id, drug, end):
-	patient = patients.find({"_id": ObjectId(id)}).next()
-	patient["prescription"]["medication"][drug][-1]["end"] = end
-	patients.update({"_id": ObjectId(id)}, patient, upsert=True)
-	return True
-
-@app.route('/medicineOngoing/<id>/<drug>')
-def medicineOngoing(id, drug):
-    patient = patients.find({"_id": ObjectId(id)}).next()
-    if drug in patient["prescription"]["medication"] == False:
-        return False
-    return (patient["prescription"]["medication"][drug][-1]["end"] is None) == False
 
 @app.route('/getMedication/<id>')
 def getMedication(id):
