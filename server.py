@@ -46,7 +46,7 @@ def updatePatient():
 @app.route('/updateNutrition/', methods = ['POST'])
 def updateNutrition():
 	patient = patients.find({"_id": ObjectId(id)}).next()
-	patient["prescription"]["nutrition"] = request.form["nutrition"]
+	patient["prescription"]["nutrition"].append(request.form["nutrition"])
 	patients.update({"_id": ObjectId(request.form["id"])}, patient, upsert=True)
 	return True
 
