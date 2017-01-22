@@ -113,7 +113,7 @@ def drugsToTakeWithin(id, minutes):
 	return str(drugsToTake)
 
 @app.route('/addMedicine', methods = ['POST'])
-def addMedicine(id):
+def addMedicine():
 	patient = patients.find({"_id": ObjectId(request.forms["id"])}).next()
 	instance = {"dosage": request.form["dosage"], "daysOfWeek": request.form["daysofWeek"], "times": request.form["times"], "start": request.form["start"], "end": request.form["end"], "comments": request.form["comments"]}
 	patient["prescription"]["medication"][drug] = patient["prescription"]["medication"].get("drug", []) + [instance]
