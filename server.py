@@ -141,7 +141,14 @@ def getPatient(id):
 
 @app.route('/getExercise/<id>')
 def getExercise(id):
-	return str(patients.find({"_id": ObjectId(id)}).next()["prescription"]["exercise"])
+
+	patient = patients.find({"_id": ObjectId(id)}).next()
+	if not "prescription" in patient:
+		return
+	if not "exercise" in patient["prescription"]:
+		return
+	return patient['prescription']['exercise']
+
 
 @app.route('/getPatients/')
 def getPatients():
